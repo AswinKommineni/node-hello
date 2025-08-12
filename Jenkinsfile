@@ -7,7 +7,7 @@ pipeline {
     }
     
     tools {
-        nodejs 'NODEJS_HOME', // This should match the name you configured in Global Tool Configuration
+        nodejs 'NODEJS_HOME' // This should match the name you configured in Global Tool Configuration
         docker 'Docker' // This should match the Docker tool name you configured
     }
 
