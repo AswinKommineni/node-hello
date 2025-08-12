@@ -23,6 +23,8 @@ pipeline {
                 sh 'node --version'
                 sh 'npm --version'
                 sh 'npm install'
+                echo 'Running npm build...'
+                sh 'npm run build'
                 echo 'Build stage complete'
             }
         }
@@ -35,7 +37,32 @@ pipeline {
         }
         stage('docker') {
             steps {
-                echo 'this is docker'
+                script {
+                    // Build Docker image
+                    echo 'Building Docker image...'
+                    
+                    sh 'docker build -t aswin3661/myapplication:${BUILD_NUMBER} .'
+                    
+                    echo 'Docker image built successfully'
+                }
+            }
+        }
+        stage('push to docker hub') {
+            steps {
+                script {
+                    // Login to Docker Hub using credentials
+                    echo 'Logging into Docker Hub...'
+                    withCredentials([usernamePassword(credentialsId: 'docker_cred', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                        
+                        // Push images to Docker Hub
+                        echo 'Pushing Docker images to Docker Hub...'
+                        
+                        sh 'docker push aswin3661/myapplication:${BUILD_NUMBER}'
+                        
+                        echo 'Docker images pushed successfully'
+                    }
+                }
             }
         }
         stage('deploy') {
@@ -47,6 +74,15 @@ pipeline {
     post {
         always {
             echo 'pipeline is completed'
+        }
+        success {
+            script {
+                // Clean up local Docker images after successful push
+                echo 'Cleaning up local Docker images...'
+                sh 'docker rmi aswin3661/myapplication:${BUILD_NUMBER} || true'
+                sh 'docker system prune -f'
+                echo 'Cleanup completed'
+            }
         }
     }
 }
