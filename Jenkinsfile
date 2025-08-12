@@ -6,9 +6,14 @@ pipeline {
         pollSCM('H/5 * * * *')
     }
     
+    environment {
+        DOCKER_HOST = 'unix:///var/run/docker.sock'
+        DOCKER_TLS_VERIFY = ''
+        DOCKER_CERT_PATH = ''
+    }
+    
     tools {
         nodejs 'NODEJS_HOME' // This should match the name you configured in Global Tool Configuration
-        docker 'Docker' // This should match the Docker tool name you configured
     }
 
     stages {
@@ -39,6 +44,11 @@ pipeline {
         stage('docker') {
             steps {
                 script {
+                    // Check Docker installation and path
+                    echo 'Checking Docker installation...'
+                    sh 'which docker || echo "Docker not found in PATH"'
+                    sh 'docker --version || echo "Docker version check failed"'
+                    
                     // Check Docker daemon connection
                     echo 'Checking Docker daemon connection...'
                     sh 'docker info || echo "Docker daemon not accessible"'
