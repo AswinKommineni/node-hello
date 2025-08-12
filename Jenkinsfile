@@ -7,7 +7,8 @@ pipeline {
     }
     
     tools {
-        nodejs 'NODEJS_HOME' // This should match the name you configured in Global Tool Configuration
+        nodejs 'NODEJS_HOME', // This should match the name you configured in Global Tool Configuration
+        docker 'Docker' // This should match the Docker tool name you configured
     }
 
     stages {
@@ -38,6 +39,10 @@ pipeline {
         stage('docker') {
             steps {
                 script {
+                    // Check Docker daemon connection
+                    echo 'Checking Docker daemon connection...'
+                    sh 'docker info || echo "Docker daemon not accessible"'
+                    
                     // Build Docker image
                     echo 'Building Docker image...'
                     
